@@ -1,6 +1,6 @@
 /*
- * ƒuƒƒbƒNŠJ•Âˆ—
- * 2015/12/21 ƒ{ƒ^ƒ“‰æ‘œ‚Ì”ñ•\Ž¦ˆ—‚ðs‚í‚È‚¢
+ * ï¿½uï¿½ï¿½ï¿½bï¿½Nï¿½Jï¿½Âï¿½ï¿½ï¿½
+ * 2015/12/21 ï¿½{ï¿½^ï¿½ï¿½ï¿½æ‘œï¿½Ì”ï¿½\ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½sï¿½ï¿½È‚ï¿½
  */
 /*
  * Return the classList property of e, if it has one.
@@ -54,6 +54,7 @@ CSSClassList.prototype.remove = function(c) {
     var pattern = new RegExp("\\b" + c + "\\b\\s*", "g");
     this.e.className = this.e.className.replace(pattern, "");
 };
+
 
 // Add c to e.className if it is not already present and return true.
 // Otherwise, remove all occurrences of c from e.className and return false.
@@ -124,4 +125,41 @@ function OCwindowWidth()
 		return window.screen.width;
 	}
 	return window.innerWidth;
+}
+
+const {Nuxt, Builder} = require('nuxt');
+
+const https = require('https');
+const fs = require('fs');
+const isProd = (process.env.NODE_ENV === 'production');
+const port = process.env.PORT || 3000;
+
+const config = require('../nuxt.config.js');
+config.dev = !isProd;
+const nuxt = new Nuxt(config);
+
+// Build only in dev mode with hot-reloading
+if (config.dev) {
+  new Builder(nuxt).build()
+    .then(listen)
+    .catch((error) => {
+      console.error(error);
+      process.exit(1);
+    });
+}
+else {
+  listen();
+}
+
+function listen() {
+
+  const options = {
+    key: fs.readFileSync('./server/cert.pem'),
+    cert: fs.readFileSync('./server/cert.pem'),
+  };
+
+  https
+    .createServer(options, nuxt.render)
+    .listen(port);
+  console.log('Server listening on `localhost:' + port + '`.');
 }
